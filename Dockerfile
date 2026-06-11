@@ -78,7 +78,11 @@ RUN npm install -g @anthropic-ai/claude-code
 # context7 MCP-сервер — предустановлен глобально (npx не докачивает его в CI)
 # и зарегистрирован в user-scope конфиге claude (/root/.claude.json).
 # Headless-claude подхватит его без настройки в основном проекте при HOME=/root.
-RUN npm install -g @upstash/context7-mcp \
+# Версия запинена: tool-имена сервера (resolve-library-id / query-docs) зашиты в
+# allowed-tools команды /mr-analyze маркетплейса. Плавающий latest при rename тула
+# (в 3.x README уже расходился с кодом) молча сломал бы fact-check — пин держит
+# контракт. Бамп версии = синхронная сверка имён тулов в mr-analyze.md.
+RUN npm install -g @upstash/context7-mcp@3.2.0 \
   && claude mcp add context7 -s user -- context7-mcp
 
 WORKDIR /work
