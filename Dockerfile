@@ -8,10 +8,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Node.js LTS — официальный бинарь. Debian-репо даёт Node 18, но context7-mcp
 # (через undici) требует глобальный File из Node 20+ — иначе падает на старте
-# с "ReferenceError: File is not defined".
-RUN NODE_VERSION=$(curl -fsSL https://nodejs.org/dist/index.json | jq -r '[.[] | select(.lts != false)][0].version') \
-  && curl -fsSL "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz" \
-    | tar -xJ -C /usr/local --strip-components=1 \
+# с "ReferenceError: File is not defined". Tarball верифицируется по SHASUMS256.
+RUN set -eux \
+  && NODE_VERSION=$(curl -fsSL https://nodejs.org/dist/index.json | jq -r '[.[] | select(.lts != false)][0].version') \
+  && cd /tmp \
+  && curl -fsSLO "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz" \
+  && curl -fsSLO "https://nodejs.org/dist/${NODE_VERSION}/SHASUMS256.txt" \
+  && grep " node-${NODE_VERSION}-linux-x64.tar.xz$" SHASUMS256.txt | sha256sum -c - \
+  && tar -xJf "node-${NODE_VERSION}-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
+  && rm "node-${NODE_VERSION}-linux-x64.tar.xz" SHASUMS256.txt \
   && node --version && npm --version
 
 # yq (mikefarah)
