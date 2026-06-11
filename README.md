@@ -14,6 +14,7 @@ Docker-образ для CI-runner'а проекта [`agent-skill-extractor`](h
 | `glab` | GitLab API (получить MR, оставить комментарий) |
 | `gh` | GitHub API (создать PR в маркетплейс) |
 | `claude-code` (`@anthropic-ai/claude-code`) | Анализ MR через Claude |
+| `context7-mcp` (`@upstash/context7-mcp`) | MCP-сервер с актуальной докой библиотек (stdio). Зарегистрирован в user-scope конфиге claude |
 | `jq`, `yq` | Парсинг JSON/YAML |
 | `git`, `nodejs`, `npm`, `curl`, `tar`, `unzip` | Базовое |
 
@@ -42,7 +43,11 @@ vault --version
 glab --version
 gh --version
 claude --version
+claude mcp list          # context7 должен быть в списке
 ```
+
+> Регистрация MCP в образе сделана в user-scope (`/root/.claude.json`), поэтому
+> headless-claude подхватит `context7` только при `HOME=/root` (дефолт для root в CI).
 
 ## Как использует основной проект
 

@@ -35,6 +35,12 @@ RUN VAULT_VERSION=$(curl -fsSL https://api.github.com/repos/hashicorp/vault/rele
 # claude-code (CLI). Плагин dex-knowledge-extractor ставится в runtime в poll-and-analyze.sh
 RUN npm install -g @anthropic-ai/claude-code
 
+# context7 MCP-сервер — предустановлен глобально (npx не докачивает его в CI)
+# и зарегистрирован в user-scope конфиге claude (/root/.claude.json).
+# Headless-claude подхватит его без настройки в основном проекте при HOME=/root.
+RUN npm install -g @upstash/context7-mcp \
+  && claude mcp add context7 -s user -- context7-mcp
+
 WORKDIR /work
 
 CMD ["bash"]
