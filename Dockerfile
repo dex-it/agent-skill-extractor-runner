@@ -3,8 +3,16 @@ FROM debian:12-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates git jq nodejs npm tar gzip unzip \
+    curl ca-certificates git jq tar gzip unzip xz-utils \
   && rm -rf /var/lib/apt/lists/*
+
+# Node.js LTS — официальный бинарь. Debian-репо даёт Node 18, но context7-mcp
+# (через undici) требует глобальный File из Node 20+ — иначе падает на старте
+# с "ReferenceError: File is not defined".
+RUN NODE_VERSION=$(curl -fsSL https://nodejs.org/dist/index.json | jq -r '[.[] | select(.lts != false)][0].version') \
+  && curl -fsSL "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz" \
+    | tar -xJ -C /usr/local --strip-components=1 \
+  && node --version && npm --version
 
 # yq (mikefarah)
 RUN curl -fsSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
